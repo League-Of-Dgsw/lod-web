@@ -8,10 +8,14 @@ interface Props {
 
 const Segment = ({ items, onChange, selected }: Props) => {
   return (
-    <div className="w-full bg-gray-50 rounded-lg p-2 flex items-center">
+    <div className="w-full flex items-center border-b border-gray-200">
       {items.map((item) => (
         <div
-          className={`flex-1 rounded text-center py-2 text-sm transition-all active:scale-95 ${selected?.value === item.value ? "bg-blue-500 text-white" : ""}`}
+          className={`flex-1 text-center py-2.5 text-sm font-medium transition-all duration-50 cursor-pointer ${
+            selected?.value === item.value
+              ? "text-gray-900 border-b-2 border-gray-900 -mb-px"
+              : "text-gray-400 hover:text-gray-600"
+          }`}
           onClick={() => onChange(item)}
           key={item.value}>
           {item.name}

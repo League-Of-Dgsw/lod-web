@@ -6,9 +6,11 @@ interface Props {
 
 const Player = ({ data }: Props) => {
   return (
-    <div className="w-full bg-gray-50 rounded-xl flex flex-col px-2">
-      <p className="w-full py-2 pt-4 border-b border-gray-300">{data.name}</p>
-      <p className="py-2 text-sm text-gray-400">{data.rank}</p>
+    <div className="w-full border border-gray-200 flex flex-col px-3 py-3 hover:border-gray-400 transition-colors duration-150">
+      <p className="text-sm font-semibold text-gray-900 truncate mb-1.5">
+        {data.name}
+      </p>
+      <p className="text-xs text-gray-400">{data.rank}</p>
     </div>
   );
 };

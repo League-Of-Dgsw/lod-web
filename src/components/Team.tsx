@@ -6,15 +6,15 @@ interface Props {
 
 const Team = ({ data }: Props) => {
   return (
-    <div className="w-full bg-gray-50 rounded-lg p-2">
-      <p className="py-2 border-b border-gray-300 text-lg font-semibold">{data.name}</p>
-      <div className="w-full pt-2 flex flex-col gap-2">
+    <div className="w-full border border-gray-200 p-3 hover:border-gray-400 transition-colors duration-150">
+      <p className="pb-2 border-b border-gray-200 text-sm font-bold text-gray-900 truncate">
+        {data.name}
+      </p>
+      <div className="w-full pt-2 flex flex-col gap-1.5">
         {data.members.map((item) => (
-          <div className="w-full flex items-center justify-between">
-            <p>{item.name}</p>
-            <p className="text-xs text-black/80 bg-gray-200 rounded-full px-3 py-0.5">
-              {item.rank}
-            </p>
+          <div key={item.name} className="w-full flex items-center justify-between">
+            <p className="text-sm text-gray-800">{item.name}</p>
+            <p className="text-xs text-gray-400">{item.rank}</p>
           </div>
         ))}
       </div>
