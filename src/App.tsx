@@ -4,7 +4,7 @@ import Router from "./components/Router";
 
 const App = () => {
   return (
-    <div className="w-full h-svh flex flex-col items-center bg-white">
+    <div className="w-full max-w-96 mx-auto h-svh flex flex-col items-center bg-white">
       <ToastContainer />
       <Header />
       <div className="w-full flex-1 overflow-y-scroll px-4">
