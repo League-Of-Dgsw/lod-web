@@ -24,7 +24,7 @@ const TeamForm = () => {
   };
 
   return (
-    <div className="w-full h-full flex flex-col gap-4">
+    <div className="w-full max-w-105 mx-auto h-full flex flex-col gap-4">
       <h1 className="font-black text-lg tracking-tight text-gray-900">팀 등록하기</h1>
       <Input
         placeholder="ex) SKT T1"
