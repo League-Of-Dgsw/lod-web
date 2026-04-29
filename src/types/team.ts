@@ -1,7 +1,14 @@
-import type { User } from "./player";
+import type { User } from './player';
 
 export interface Team {
   id: number;
   name: string;
+  gameId: number;
   members: User[];
+}
+
+export interface CreateTeamBody {
+  name: string;
+  gameId: number;
+  members: { name: string }[];
 }

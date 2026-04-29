@@ -1,12 +1,22 @@
 import { Plus } from "lucide-react";
-import { player } from "../constants/player";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Player from "../components/Player";
 import { Drawer } from "vaul";
-import { useState } from "react";
 import FaForm from "../components/FaForm";
+import { useGameStore } from "../stores/game";
+import { getApplications } from "../api/applications";
 
 const RegisterFa = () => {
   const [modalOpen, setModalOpen] = useState(false);
+  const { game } = useGameStore();
+  const gameId = game ? parseInt(game.value) : undefined;
+
+  const { data: applications = [] } = useQuery({
+    queryKey: ["applications", gameId],
+    queryFn: () => getApplications(gameId),
+    enabled: !!gameId,
+  });
 
   return (
     <div className="w-full flex flex-col items-start gap-2">
@@ -16,7 +26,7 @@ const RegisterFa = () => {
         <Plus size={16} /> FA 등록
       </button>
       <div className="w-full grid grid-cols-3 gap-2">
-        {player.map((item) => (
+        {applications.map((item) => (
           <Player data={item} key={item.id} />
         ))}
       </div>
@@ -26,7 +36,7 @@ const RegisterFa = () => {
           <Drawer.Content className="fixed bottom-0 left-0 right-0 bg-white p-6 rounded-t-3xl shadow-2xl">
             <Drawer.Handle />
             <div className="h-[50svh] py-4">
-              <FaForm />
+              <FaForm onSuccess={() => setModalOpen(false)} />
             </div>
           </Drawer.Content>
         </Drawer.Portal>

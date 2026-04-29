@@ -12,9 +12,8 @@ const Team = ({ data }: Props) => {
       </p>
       <div className="w-full pt-2 flex flex-col gap-1.5">
         {data.members.map((item) => (
-          <div key={item.name} className="w-full flex items-center justify-between">
+          <div key={item.id} className="w-full flex items-center justify-between">
             <p className="text-sm text-gray-800">{item.name}</p>
-            <p className="text-xs text-gray-400">{item.rank}</p>
           </div>
         ))}
       </div>

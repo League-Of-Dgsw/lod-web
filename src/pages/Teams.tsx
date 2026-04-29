@@ -1,12 +1,22 @@
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { teams } from "../constants/teams";
+import { useQuery } from "@tanstack/react-query";
 import Team from "../components/Team";
 import { Drawer } from "vaul";
 import TeamForm from "../components/TeamForm";
+import { useGameStore } from "../stores/game";
+import { getTeams } from "../api/teams";
 
 const Teams = () => {
   const [modalOpen, setModalOpen] = useState(false);
+  const { game } = useGameStore();
+  const gameId = game ? parseInt(game.value) : undefined;
+
+  const { data: teams = [] } = useQuery({
+    queryKey: ["teams", gameId],
+    queryFn: () => getTeams(gameId),
+    enabled: !!gameId,
+  });
 
   return (
     <div className="w-full flex flex-col items-start gap-2">
@@ -26,7 +36,7 @@ const Teams = () => {
           <Drawer.Content className="fixed bottom-0 left-0 right-0 bg-white p-6 rounded-t-3xl shadow-2xl">
             <Drawer.Handle />
             <div className="h-[90svh] py-4">
-              <TeamForm />
+              <TeamForm onSuccess={() => setModalOpen(false)} />
             </div>
           </Drawer.Content>
         </Drawer.Portal>

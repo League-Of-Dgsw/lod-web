@@ -1,15 +1,42 @@
 import { Plus, X } from "lucide-react";
-import { player } from "../constants/player";
 import Input from "./Input";
 import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { User } from "../types/player";
 import { toast } from "@cher1shrxd/toast";
+import { getUsers } from "../api/users";
+import { createTeam } from "../api/teams";
+import { useGameStore } from "../stores/game";
 
-const TeamForm = () => {
+interface Props {
+  onSuccess?: () => void;
+}
+
+const TeamForm = ({ onSuccess }: Props) => {
   const [selected, setSelected] = useState<User[]>([]);
   const [name, setName] = useState("");
   const [query, setQuery] = useState("");
-  const filtered = player.filter((item) => item.name.includes(query.trim()));
+  const { game } = useGameStore();
+  const queryClient = useQueryClient();
+
+  const { data: users = [] } = useQuery({
+    queryKey: ["users"],
+    queryFn: getUsers,
+  });
+
+  const filtered = users.filter((item) => item.name.includes(query.trim()));
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: createTeam,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["teams"] });
+      toast.success("팀 등록 완료", "팀이 성공적으로 등록되었습니다.");
+      onSuccess?.();
+    },
+    onError: () => {
+      toast.error("팀 등록 실패", "다시 시도해 주세요.");
+    },
+  });
 
   const handleSelect = (user: User) => {
     if (!selected.find((item) => item.id === user.id)) {
@@ -23,6 +50,26 @@ const TeamForm = () => {
     setSelected((prev) => prev.filter((item) => item.id !== user.id));
   };
 
+  const handleSubmit = () => {
+    if (!name.trim()) {
+      toast.error("입력 오류", "팀 이름을 입력해 주세요.");
+      return;
+    }
+    if (!game) {
+      toast.error("입력 오류", "종목을 선택해 주세요.");
+      return;
+    }
+    if (selected.length !== 5) {
+      toast.error("입력 오류", "팀원 5명을 정확히 선택해 주세요.");
+      return;
+    }
+    mutate({
+      name,
+      gameId: parseInt(game.value),
+      members: selected.map((m) => ({ name: m.name })),
+    });
+  };
+
   return (
     <div className="w-full max-w-105 mx-auto h-full flex flex-col gap-4">
       <h1 className="font-black text-lg tracking-tight text-gray-900">팀 등록하기</h1>
@@ -33,7 +80,7 @@ const TeamForm = () => {
         name={name}
       />
       <div className="w-full flex flex-col gap-2">
-        <h2 className="text-xs font-semibold tracking-wide text-gray-500 uppercase">팀원 추가</h2>
+        <h2 className="text-xs font-semibold tracking-wide text-gray-500 uppercase">팀원 추가 (5명)</h2>
         <Input
           placeholder="이름으로 검색..."
           onChange={(e) => setQuery(e.target.value)}
@@ -49,7 +96,7 @@ const TeamForm = () => {
                 }`}>
                 <div>
                   <p className="text-sm font-medium text-gray-800">{item.name}</p>
-                  <p className="text-xs text-gray-400">{item.rank}</p>
+                  <p className="text-xs text-gray-400">{item.studentId}</p>
                 </div>
                 {selected.find((p) => p.id === item.id) ? (
                   <span className="text-xs text-gray-400">추가됨</span>
@@ -69,10 +116,10 @@ const TeamForm = () => {
           )}
         </div>
         <div className="flex flex-col gap-2">
-          <h2 className="text-xs font-semibold tracking-wide text-gray-500 uppercase">팀원 목록</h2>
+          <h2 className="text-xs font-semibold tracking-wide text-gray-500 uppercase">팀원 목록 ({selected.length}/5)</h2>
           <div className="w-full min-h-10 flex items-start justify-start gap-1.5 flex-wrap">
             {selected.length > 0 ? (
-              selected.map((item) => (
+              selected.map((item, idx) => (
                 <div
                   key={item.id}
                   className="flex gap-1 items-center border border-gray-200 hover:border-gray-400 px-2.5 py-1 cursor-pointer transition-colors duration-150"
@@ -90,8 +137,11 @@ const TeamForm = () => {
         </div>
       </div>
       <div className="flex-1" />
-      <button className="w-full bg-gray-900 hover:bg-black active:opacity-80 py-3 text-white font-bold text-sm tracking-wide transition-all duration-150 cursor-pointer">
-        등록하기
+      <button
+        onClick={handleSubmit}
+        disabled={isPending}
+        className="w-full bg-gray-900 hover:bg-black active:opacity-80 py-3 text-white font-bold text-sm tracking-wide transition-all duration-150 cursor-pointer disabled:opacity-50">
+        {isPending ? "등록 중..." : "등록하기"}
       </button>
     </div>
   );
