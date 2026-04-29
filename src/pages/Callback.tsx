@@ -48,17 +48,19 @@ const Callback = () => {
     const redirectUri = `${window.location.origin}/callback`;
 
     // Step 1: DAuth에서 access_token 교환
+    const formData = new URLSearchParams({
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: redirectUri,
+      client_id: DAUTH_CLIENT_ID,
+      client_secret: DAUTH_CLIENT_SECRET,
+      code_verifier: codeVerifier,
+    });
+
     fetch('https://dodam-api.b1nd.com/oauth/token', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        grant_type: 'authorization_code',
-        code,
-        redirect_uri: redirectUri,
-        client_id: DAUTH_CLIENT_ID,
-        client_secret: DAUTH_CLIENT_SECRET,
-        code_verifier: codeVerifier,
-      }),
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: formData,
     })
       .then((r) => r.json())
       .then(({ access_token }: { access_token: string }) => {
