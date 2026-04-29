@@ -119,7 +119,7 @@ const TeamForm = ({ onSuccess }: Props) => {
           <h2 className="text-xs font-semibold tracking-wide text-gray-500 uppercase">팀원 목록 ({selected.length}/5)</h2>
           <div className="w-full min-h-10 flex items-start justify-start gap-1.5 flex-wrap">
             {selected.length > 0 ? (
-              selected.map((item, idx) => (
+              selected.map((item) => (
                 <div
                   key={item.id}
                   className="flex gap-1 items-center border border-gray-200 hover:border-gray-400 px-2.5 py-1 cursor-pointer transition-colors duration-150"
