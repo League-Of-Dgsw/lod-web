@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "@b1nd/dodam-design-system/colors/colors.css";
+@import "@b1nd/dodam-design-system/themes/theme.tailwind.css";
 
 * {
   user-select: none;

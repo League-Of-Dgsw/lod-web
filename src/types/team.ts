@@ -4,6 +4,7 @@ export interface Team {
   id: number;
   name: string;
   gameId: number;
+  leaderId: number;
   members: User[];
 }
 

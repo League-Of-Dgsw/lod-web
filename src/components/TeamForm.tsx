@@ -3,7 +3,7 @@ import Input from "./Input";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { User } from "../types/player";
-import { toast } from "@cher1shrxd/toast";
+import { useToast } from "@b1nd/dodam-design-system/components";
 import { getUsers } from "../api/users";
 import { createTeam } from "../api/teams";
 import { useGameStore } from "../stores/game";
@@ -18,6 +18,7 @@ const TeamForm = ({ onSuccess }: Props) => {
   const [query, setQuery] = useState("");
   const { game } = useGameStore();
   const queryClient = useQueryClient();
+  const toast = useToast();
 
   const { data: users = [] } = useQuery({
     queryKey: ["users"],
@@ -30,11 +31,11 @@ const TeamForm = ({ onSuccess }: Props) => {
     mutationFn: createTeam,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["teams"] });
-      toast.success("팀 등록 완료", "팀이 성공적으로 등록되었습니다.");
+      toast.success("팀이 성공적으로 등록되었습니다.");
       onSuccess?.();
     },
     onError: () => {
-      toast.error("팀 등록 실패", "다시 시도해 주세요.");
+      toast.error("팀 등록에 실패했습니다. 다시 시도해 주세요.");
     },
   });
 
@@ -42,7 +43,7 @@ const TeamForm = ({ onSuccess }: Props) => {
     if (!selected.find((item) => item.id === user.id)) {
       setSelected((prev) => [...prev, user]);
     } else {
-      toast.error("팀원 추가 실패", "이미 추가된 팀원입니다.");
+      toast.error("이미 추가된 팀원입니다.");
     }
   };
 
@@ -52,15 +53,15 @@ const TeamForm = ({ onSuccess }: Props) => {
 
   const handleSubmit = () => {
     if (!name.trim()) {
-      toast.error("입력 오류", "팀 이름을 입력해 주세요.");
+      toast.error("팀 이름을 입력해 주세요.");
       return;
     }
     if (!game) {
-      toast.error("입력 오류", "종목을 선택해 주세요.");
+      toast.error("종목을 선택해 주세요.");
       return;
     }
     if (selected.length !== 5) {
-      toast.error("입력 오류", "팀원 5명을 정확히 선택해 주세요.");
+      toast.error("팀원 5명을 정확히 선택해 주세요.");
       return;
     }
     mutate({
