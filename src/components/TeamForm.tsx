@@ -1,9 +1,9 @@
 import { Plus, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { User } from "../types/player";
 import { useToast, FilledTextField, FilledButton, IconButton } from "@b1nd/dodam-design-system/components";
-import { getUsers } from "../api/users";
+import { getUsers, getMe } from "../api/users";
 import { createTeam } from "../api/teams";
 import { useGameStore } from "../stores/game";
 
@@ -23,6 +23,17 @@ const TeamForm = ({ onSuccess }: Props) => {
     queryKey: ["users"],
     queryFn: getUsers,
   });
+
+  const { data: me } = useQuery({
+    queryKey: ["me"],
+    queryFn: getMe,
+  });
+
+  useEffect(() => {
+    if (me && !selected.find((u) => u.id === me.id)) {
+      setSelected([me]);
+    }
+  }, [me]);
 
   const filtered = users.filter((item) => item.name.includes(query.trim()));
 
@@ -47,6 +58,7 @@ const TeamForm = ({ onSuccess }: Props) => {
   };
 
   const handleDelete = (user: User) => {
+    if (me && user.id === me.id) return;
     setSelected((prev) => prev.filter((item) => item.id !== user.id));
   };
 
@@ -123,15 +135,22 @@ const TeamForm = ({ onSuccess }: Props) => {
           <h2 className="text-xs font-semibold tracking-wide text-text-tertiary uppercase">팀원 목록 ({selected.length}/5)</h2>
           <div className="w-full min-h-10 flex items-start justify-start gap-1.5 flex-wrap">
             {selected.length > 0 ? (
-              selected.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex gap-1 items-center border border-border-normal hover:border-border-strong px-2.5 py-1 cursor-pointer transition-colors duration-150"
-                  onClick={() => handleDelete(item)}>
-                  <p className="text-xs text-text-secondary">{item.name}</p>
-                  <X size={12} className="text-text-placeholder" />
-                </div>
-              ))
+              selected.map((item) => {
+                const isMe = !!me && item.id === me.id;
+                return (
+                  <div
+                    key={item.id}
+                    className={`flex gap-1 items-center border px-2.5 py-1 transition-colors duration-150 ${
+                      isMe
+                        ? "border-border-normal cursor-default"
+                        : "border-border-normal hover:border-border-strong cursor-pointer"
+                    }`}
+                    onClick={() => handleDelete(item)}>
+                    <p className="text-xs text-text-secondary">{item.name}</p>
+                    {!isMe && <X size={12} className="text-text-placeholder" />}
+                  </div>
+                );
+              })
             ) : (
               <div className="w-full text-center text-sm text-text-placeholder py-2">
                 추가된 팀원이 없습니다.
@@ -145,7 +164,7 @@ const TeamForm = ({ onSuccess }: Props) => {
         role="primary"
         size="large"
         display="inline"
-        buttonCustomStyle={{ width: "100%" }}
+        buttonCustomStyle={{ width: "100%", boxSizing: "border-box" }}
         onClick={handleSubmit}
         disabled={isPending}>
         {isPending ? "등록 중..." : "등록하기"}

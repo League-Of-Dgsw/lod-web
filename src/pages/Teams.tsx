@@ -111,7 +111,7 @@ const Teams = () => {
                 role="primary"
                 size="large"
                 display="inline"
-                buttonCustomStyle={{ width: "100%" }}
+                buttonCustomStyle={{ width: "100%", boxSizing: "border-box" }}
                 onClick={() => execUpdate()}
                 disabled={isUpdating || !editName.trim()}>
                 {isUpdating ? "수정 중..." : "수정하기"}

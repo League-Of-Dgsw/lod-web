@@ -53,7 +53,7 @@ const FaForm = ({ onSuccess }: Props) => {
         role="primary"
         size="large"
         display="inline"
-        buttonCustomStyle={{ width: "100%" }}
+        buttonCustomStyle={{ width: "100%", boxSizing: "border-box" }}
         onClick={handleSubmit}
         disabled={isPending}>
         {isPending ? "등록 중..." : "등록하기"}

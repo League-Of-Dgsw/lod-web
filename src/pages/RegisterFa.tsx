@@ -6,6 +6,7 @@ import { Drawer } from "vaul";
 import FaForm from "../components/FaForm";
 import { useGameStore } from "../stores/game";
 import { getApplications } from "../api/applications";
+import { getMe } from "../api/users";
 import { IconButton } from "@b1nd/dodam-design-system/components";
 
 const RegisterFa = () => {
@@ -19,14 +20,23 @@ const RegisterFa = () => {
     enabled: !!gameId,
   });
 
+  const { data: me } = useQuery({
+    queryKey: ["me"],
+    queryFn: getMe,
+  });
+
+  const alreadyRegistered = !!me && applications.some((a) => a.userId === me.id);
+
   return (
     <div className="w-full flex flex-col items-start gap-2">
-      <div className="self-end mb-2">
-        <IconButton
-          icon={<Plus size={16} />}
-          onClick={() => setModalOpen(true)}
-        />
-      </div>
+      {!alreadyRegistered && (
+        <div className="self-end mb-2">
+          <IconButton
+            icon={<Plus size={16} />}
+            onClick={() => setModalOpen(true)}
+          />
+        </div>
+      )}
       <div className="w-full grid grid-cols-3 gap-2">
         {applications.map((item) => (
           <Player data={item} key={item.id} />

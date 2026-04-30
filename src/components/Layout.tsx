@@ -10,7 +10,7 @@ export const Layout = ({ outlet }: RouteProps) => {
     <>
       <ToastProvider />
       <div
-        className="w-full h-svh flex flex-col items-center bg-background-surface"
+        className="w-full h-svh flex flex-col items-center bg-background-default"
         style={{ paddingTop: top, paddingBottom: bottom }}
       >
         <Header />
