@@ -31,7 +31,7 @@ const Team = ({ data, isLeader, onEdit, onDelete }: Props) => {
       <div className="w-full pt-2 flex flex-col gap-1.5">
         {data.members.map((item) => (
           <div key={item.id} className="w-full flex items-center justify-between">
-            <p className="text-sm text-text-secondary">{item.name}</p>
+            <p className="text-sm text-text-secondary">{item.user.name}</p>
           </div>
         ))}
       </div>

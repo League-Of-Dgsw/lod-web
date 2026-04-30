@@ -2,18 +2,26 @@ import { Plus, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { User } from "../types/player";
-import { useToast, FilledTextField, FilledButton, IconButton } from "@b1nd/dodam-design-system/components";
+import type { Team } from "../types/team";
+import {
+  useToast,
+  FilledTextField,
+  FilledButton,
+  IconButton,
+} from "@b1nd/dodam-design-system/components";
 import { getUsers, getMe } from "../api/users";
-import { createTeam } from "../api/teams";
+import { createTeam, updateTeam } from "../api/teams";
 import { useGameStore } from "../stores/game";
 
 interface Props {
+  initialTeam?: Team;
   onSuccess?: () => void;
 }
 
-const TeamForm = ({ onSuccess }: Props) => {
+const TeamForm = ({ initialTeam, onSuccess }: Props) => {
+  const isEdit = !!initialTeam;
   const [selected, setSelected] = useState<User[]>([]);
-  const [name, setName] = useState("");
+  const [name, setName] = useState(initialTeam?.name ?? "");
   const [query, setQuery] = useState("");
   const { game } = useGameStore();
   const queryClient = useQueryClient();
@@ -30,24 +38,44 @@ const TeamForm = ({ onSuccess }: Props) => {
   });
 
   useEffect(() => {
-    if (me && !selected.find((u) => u.id === me.id)) {
-      setSelected([me]);
+    if (!me) return;
+    if (isEdit && initialTeam.members.length > 0) {
+      const initialUsers = initialTeam.members.map((m) => m.user);
+      const hasMe = initialUsers.some((u) => u.id === me.id);
+      setTimeout(() => {
+        setSelected(hasMe ? initialUsers : [me, ...initialUsers]);
+      }, 0);
+    } else if (!isEdit && !selected.some((u) => u.id === me.id)) {
+      setTimeout(() => {
+        setSelected([me]);
+      }, 0);
     }
-  }, [me]);
+  }, [me, isEdit, initialTeam]);
 
   const filtered = users.filter((item) => item.name.includes(query.trim()));
 
-  const { mutate, isPending } = useMutation({
+  const { mutate: execCreate, isPending: isCreating } = useMutation({
     mutationFn: createTeam,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["teams"] });
       toast.success("팀이 성공적으로 등록되었습니다.");
       onSuccess?.();
     },
-    onError: () => {
-      toast.error("팀 등록에 실패했습니다. 다시 시도해 주세요.");
-    },
+    onError: () => toast.error("팀 등록에 실패했습니다. 다시 시도해 주세요."),
   });
+
+  const { mutate: execUpdate, isPending: isUpdating } = useMutation({
+    mutationFn: (body: Parameters<typeof updateTeam>[1]) =>
+      updateTeam(initialTeam!.id, body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["teams"] });
+      toast.success("팀이 성공적으로 수정되었습니다.");
+      onSuccess?.();
+    },
+    onError: () => toast.error("팀 수정에 실패했습니다. 다시 시도해 주세요."),
+  });
+
+  const isPending = isCreating || isUpdating;
 
   const handleSelect = (user: User) => {
     if (!selected.find((item) => item.id === user.id)) {
@@ -67,7 +95,7 @@ const TeamForm = ({ onSuccess }: Props) => {
       toast.error("팀 이름을 입력해 주세요.");
       return;
     }
-    if (!game) {
+    if (!isEdit && !game) {
       toast.error("종목을 선택해 주세요.");
       return;
     }
@@ -75,16 +103,21 @@ const TeamForm = ({ onSuccess }: Props) => {
       toast.error("팀원 5명을 정확히 선택해 주세요.");
       return;
     }
-    mutate({
-      name,
-      gameId: parseInt(game.value),
-      members: selected.filter((m) => m.id !== me!.id).map((m) => ({ studentId: m.studentId })),
-    });
+    const members = selected
+      .filter((m) => m.id !== me!.id)
+      .map((m) => ({ studentId: m.studentId }));
+    if (isEdit) {
+      execUpdate({ name, members });
+    } else {
+      execCreate({ name, gameId: parseInt(game!.value), members });
+    }
   };
 
   return (
     <div className="w-full max-w-105 mx-auto h-full flex flex-col gap-4">
-      <h1 className="font-black text-lg tracking-tight text-text-primary">팀 등록하기</h1>
+      <h1 className="font-black text-lg tracking-tight text-text-primary">
+        {isEdit ? "팀 수정하기" : "팀 등록하기"}
+      </h1>
       <FilledTextField
         type="text"
         label="팀 이름을 입력해 주세요"
@@ -93,7 +126,9 @@ const TeamForm = ({ onSuccess }: Props) => {
         onChange={(e) => setName(e.target.value)}
       />
       <div className="w-full flex flex-col gap-2">
-        <h2 className="text-xs font-semibold tracking-wide text-text-tertiary uppercase">팀원 추가 (5명)</h2>
+        <h2 className="text-xs font-semibold tracking-wide text-text-tertiary uppercase">
+          팀원 추가 (5명)
+        </h2>
         <FilledTextField
           type="text"
           label=""
@@ -108,10 +143,15 @@ const TeamForm = ({ onSuccess }: Props) => {
                 key={item.id}
                 className={`w-full flex items-center justify-between px-3 py-2.5 hover:bg-fill-primary transition-colors duration-100 ${
                   arr.length - 1 !== idx ? "border-b border-border-subtle" : ""
-                }`}>
+                }`}
+              >
                 <div>
-                  <p className="text-sm font-medium text-text-secondary">{item.name}</p>
-                  <p className="text-xs text-text-placeholder">{item.studentId}</p>
+                  <p className="text-sm font-medium text-text-secondary">
+                    {item.name}
+                  </p>
+                  <p className="text-xs text-text-placeholder">
+                    {item.studentId}
+                  </p>
                 </div>
                 {selected.find((p) => p.id === item.id) ? (
                   <span className="text-xs text-text-placeholder">추가됨</span>
@@ -132,7 +172,9 @@ const TeamForm = ({ onSuccess }: Props) => {
           )}
         </div>
         <div className="flex flex-col gap-2">
-          <h2 className="text-xs font-semibold tracking-wide text-text-tertiary uppercase">팀원 목록 ({selected.length}/5)</h2>
+          <h2 className="text-xs font-semibold tracking-wide text-text-tertiary uppercase">
+            팀원 목록 ({selected.length}/5)
+          </h2>
           <div className="w-full min-h-10 flex items-start justify-start gap-1.5 flex-wrap">
             {selected.length > 0 ? (
               selected.map((item) => {
@@ -145,7 +187,8 @@ const TeamForm = ({ onSuccess }: Props) => {
                         ? "border-border-normal cursor-default"
                         : "border-border-normal hover:border-border-strong cursor-pointer"
                     }`}
-                    onClick={() => handleDelete(item)}>
+                    onClick={() => handleDelete(item)}
+                  >
                     <p className="text-xs text-text-secondary">{item.name}</p>
                     {!isMe && <X size={12} className="text-text-placeholder" />}
                   </div>
@@ -166,8 +209,15 @@ const TeamForm = ({ onSuccess }: Props) => {
         display="inline"
         buttonCustomStyle={{ width: "100%", boxSizing: "border-box" }}
         onClick={handleSubmit}
-        disabled={isPending}>
-        {isPending ? "등록 중..." : "등록하기"}
+        disabled={isPending}
+      >
+        {isPending
+          ? isEdit
+            ? "수정 중..."
+            : "등록 중..."
+          : isEdit
+            ? "수정하기"
+            : "등록하기"}
       </FilledButton>
     </div>
   );
