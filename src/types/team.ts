@@ -11,5 +11,5 @@ export interface Team {
 export interface CreateTeamBody {
   name: string;
   gameId: number;
-  members: { name: string }[];
+  members: { studentId: string }[];
 }

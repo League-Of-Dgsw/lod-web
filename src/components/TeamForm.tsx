@@ -78,7 +78,7 @@ const TeamForm = ({ onSuccess }: Props) => {
     mutate({
       name,
       gameId: parseInt(game.value),
-      members: selected.map((m) => ({ name: m.name })),
+      members: selected.filter((m) => m.id !== me!.id).map((m) => ({ studentId: m.studentId })),
     });
   };
 
