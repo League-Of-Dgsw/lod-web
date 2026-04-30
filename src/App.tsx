@@ -1,12 +1,16 @@
 import { useEffect } from "react";
-import Header from "./components/Header";
 import { exchangeDAuthToken } from "./api/auth";
 import { useAuthStore } from "./stores/auth";
 import { BridgeProvider } from "@b1nd/aid-kit/bridge-kit/web";
-import { RouteProvider, Router, type RouteProps } from "@b1nd/aid-kit/navigation";
+import {
+  RouteProvider,
+  Router,
+} from "@b1nd/aid-kit/navigation";
 import { AppStateProvider } from "@b1nd/aid-kit/app-state";
 import Home from "./pages/Home";
-import { ToastProvider } from "@b1nd/dodam-design-system/components";
+import { SafeAreaProvider } from "@b1nd/aid-kit/safe-area-provider";
+import { Layout } from "./components/Layout";
+import { OverlayProvider } from "@b1nd/dodam-design-system/components";
 
 const App = () => {
   const { setToken } = useAuthStore();
@@ -38,26 +42,18 @@ const App = () => {
   };
 
   return (
-    <BridgeProvider>
-      <AppStateProvider>
-        <RouteProvider routes={routes}>
-          <Router routes={routes} />
-        </RouteProvider>
-      </AppStateProvider>
-    </BridgeProvider>
+    <SafeAreaProvider>
+      <BridgeProvider>
+        <AppStateProvider>
+          <OverlayProvider>
+            <RouteProvider routes={routes}>
+              <Router routes={routes} />
+            </RouteProvider>
+          </OverlayProvider>
+        </AppStateProvider>
+      </BridgeProvider>
+    </SafeAreaProvider>
   );
 };
 
 export default App;
-
-export const Layout = ({ outlet }: RouteProps) => {
-  return (
-    <div className="w-full h-svh flex flex-col items-center bg-white">
-      <ToastProvider />
-      <Header />
-      <div className="w-full flex-1 overflow-y-scroll px-4">
-        <div className="py-4">{outlet}</div>
-      </div>
-    </div>
-  );
-};

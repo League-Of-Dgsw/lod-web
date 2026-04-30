@@ -6,4 +6,5 @@
   user-select: none;
   -ms-overflow-style: none;
   scrollbar-width: none;
+  touch-action: pan-x pan-y;
 }

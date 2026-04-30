@@ -6,11 +6,11 @@ interface Props {
 
 const Player = ({ data }: Props) => {
   return (
-    <div className="w-full border border-gray-200 flex flex-col px-3 py-3 hover:border-gray-400 transition-colors duration-150">
-      <p className="text-sm font-semibold text-gray-900 truncate mb-1.5">
+    <div className="w-full border border-border-normal flex flex-col px-3 py-3 hover:border-border-strong transition-colors duration-150">
+      <p className="text-sm font-semibold text-text-primary truncate mb-1.5">
         {data.user?.name ?? `User #${data.userId}`}
       </p>
-      <p className="text-xs text-gray-400">{data.tier}</p>
+      <p className="text-xs text-text-placeholder">{data.tier}</p>
     </div>
   );
 };

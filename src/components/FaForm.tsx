@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useGameStore } from "../stores/game";
-import { useToast } from "@b1nd/dodam-design-system/components";
-import Input from "./Input";
+import { useToast, FilledTextField, FilledButton } from "@b1nd/dodam-design-system/components";
 import { createApplication } from "../api/applications";
 
 interface Props {
@@ -41,19 +40,24 @@ const FaForm = ({ onSuccess }: Props) => {
 
   return (
     <div className="w-full max-w-105 mx-auto h-full flex flex-col gap-4">
-      <h1 className="font-black text-lg tracking-tight text-gray-900">FA 등록하기</h1>
-      <Input
+      <h1 className="font-black text-lg tracking-tight text-text-primary">FA 등록하기</h1>
+      <FilledTextField
+        type="text"
+        label={`${game?.name ?? ""}의 경쟁전 랭크를 입력해 주세요.`}
         placeholder="ex) 다이아몬드 1"
-        label={`${game?.name}의 경쟁전 랭크를 입력해 주세요.`}
+        value={tier}
         onChange={(e) => setTier(e.target.value)}
       />
       <div className="flex-1" />
-      <button
+      <FilledButton
+        role="primary"
+        size="large"
+        display="inline"
+        buttonCustomStyle={{ width: "100%" }}
         onClick={handleSubmit}
-        disabled={isPending}
-        className="w-full bg-gray-900 hover:bg-black active:opacity-80 py-3 text-white font-bold text-sm tracking-wide transition-all duration-150 cursor-pointer disabled:opacity-50">
+        disabled={isPending}>
         {isPending ? "등록 중..." : "등록하기"}
-      </button>
+      </FilledButton>
     </div>
   );
 };
